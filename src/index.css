@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global look */
+body {
+  @apply font-sans bg-slate-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100;
+}
+
+/* Reusable styles */
+.btn {
+  @apply inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium
+         border border-slate-300 dark:border-slate-700
+         bg-white/80 dark:bg-slate-900/60
+         hover:bg-slate-100 dark:hover:bg-slate-800
+         backdrop-blur;
+}
+
+.card {
+  @apply rounded-2xl border border-slate-200 dark:border-slate-800 p-4 shadow-sm
+         bg-white dark:bg-slate-900;
+}
+
+/* Active tab helper */
+.tab-active { @apply bg-slate-100 dark:bg-slate-800; }
