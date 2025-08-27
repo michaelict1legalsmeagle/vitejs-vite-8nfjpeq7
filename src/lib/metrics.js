@@ -73,5 +73,6 @@ export function computeMetricsWithRegion(values) {
         annualCashflow,
         cashInvested,
         cocPct,
+        sdltIncluded: !!values.includeSdlt,
     };
 }

@@ -1,151 +1,130 @@
+// src/components/InvestorInputs.tsx
 import React from "react";
 import useDealValues from "../store/useDealValues";
-
-type NumKey = "price" | "rent" | "loan" | "rate" | "term" | "costs";
 
 export default function InvestorInputs() {
   const { values, setValues } = useDealValues((s) => s);
 
-  // Store-level coercion handles strings like "£250,000" or "6.25%"
-  const onNum = (k: NumKey) => (e: React.ChangeEvent<HTMLInputElement>) =>
-    setValues({ [k]: e.target.value } as any);
-  const onText =
-    (k: "postcode") =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
-      setValues({ [k]: e.target.value });
-  const onLender = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setValues({ lender: e.target.value });
-  const onProduct = (e: React.ChangeEvent<HTMLSelectElement>) =>
-    setValues({ product: e.target.value as any });
-  const onInclude = (e: React.ChangeEvent<HTMLInputElement>) =>
-    setValues({ includeSdlt: e.target.checked });
-
-  const v = (n: number | null | undefined) =>
-    n ?? n === 0 ? String(n ?? "") : "";
+  const set = (patch: Partial<typeof values>) =>
+    setValues((curr) => ({ ...curr, ...patch }));
 
   return (
     <div className="card">
-      <h2 className="text-base font-semibold mb-3">Investor Inputs</h2>
+      <div className="text-base font-semibold mb-3">Investor Inputs</div>
 
-      {/* 3-column grid like your preferred layout */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-        {/* Price */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Purchase Price</span>
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Purchase Price</span>
           <input
             className="input"
-            inputMode="decimal"
-            placeholder="0"
-            value={v(values.price)}
-            onChange={onNum("price")}
-          />
-        </label>
-
-        {/* Rent */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Monthly Rent</span>
-          <input
-            className="input"
-            inputMode="decimal"
-            placeholder="0"
-            value={v(values.rent)}
-            onChange={onNum("rent")}
-          />
-        </label>
-
-        {/* Loan */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Loan Amount</span>
-          <input
-            className="input"
-            inputMode="decimal"
-            placeholder="0"
-            value={v(values.loan)}
-            onChange={onNum("loan")}
-          />
-        </label>
-
-        {/* Rate */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Interest Rate (%)</span>
-          <input
-            className="input"
-            inputMode="decimal"
-            placeholder="0"
-            value={v(values.rate)}
-            onChange={onNum("rate")}
-          />
-        </label>
-
-        {/* Term */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Term (years)</span>
-          <input
-            className="input"
+            type="number"
             inputMode="numeric"
+            step="1"
+            value={values.price ?? ""}
+            onChange={(e) => set({ price: e.target.value })}
             placeholder="0"
-            value={v(values.term)}
-            onChange={onNum("term")}
           />
         </label>
 
-        {/* Upfront costs */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Upfront Costs</span>
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Monthly Rent</span>
           <input
             className="input"
+            type="number"
+            inputMode="numeric"
+            step="1"
+            value={values.rent ?? ""}
+            onChange={(e) => set({ rent: e.target.value })}
+            placeholder="0"
+          />
+        </label>
+
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Loan Amount</span>
+          <input
+            className="input"
+            type="number"
+            inputMode="numeric"
+            step="1"
+            value={values.loan ?? ""}
+            onChange={(e) => set({ loan: e.target.value })}
+            placeholder="0"
+          />
+        </label>
+
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Interest Rate (%)</span>
+          <input
+            className="input"
+            type="number"
             inputMode="decimal"
-            placeholder="0"
-            value={v(values.costs)}
-            onChange={onNum("costs")}
+            step="0.01"
+            value={values.rate ?? ""}
+            onChange={(e) => set({ rate: e.target.value })}
+            placeholder="5.50"
           />
         </label>
 
-        {/* Product */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Product</span>
-          <select className="input" value={values.product || ""} onChange={onProduct}>
-            <option value="">—</option>
-            <option value="IO">Interest Only</option>
-            <option value="REPAY">Repayment</option>
-          </select>
-        </label>
-
-        {/* Postcode */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Postcode</span>
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Term (years)</span>
           <input
             className="input"
-            placeholder="E.g. B3 2JR"
-            value={values.postcode || ""}
-            onChange={onText("postcode")}
+            type="number"
+            inputMode="numeric"
+            step="1"
+            value={values.term ?? ""}
+            onChange={(e) => set({ term: e.target.value })}
+            placeholder="25"
           />
         </label>
 
-        {/* Lender dropdown */}
-        <label className="flex flex-col gap-1">
-          <span className="text-sm text-slate-500">Lender (optional)</span>
-          <select className="input" value={values.lender || ""} onChange={onLender}>
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Upfront Costs</span>
+          <input
+            className="input"
+            type="number"
+            inputMode="numeric"
+            step="1"
+            value={values.costs ?? ""}
+            onChange={(e) => set({ costs: e.target.value })}
+            placeholder="0"
+          />
+        </label>
+
+        <label className="text-sm md:col-span-2">
+          <span className="block text-slate-500 mb-1">Postcode</span>
+          <input
+            className="input"
+            value={values.postcode ?? ""}
+            onChange={(e) => set({ postcode: e.target.value })}
+            placeholder="E.g. B3 2JR"
+          />
+        </label>
+
+        <label className="text-sm">
+          <span className="block text-slate-500 mb-1">Lender (optional)</span>
+          <select
+            className="input"
+            value={values.lender ?? ""}
+            onChange={(e) => set({ lender: e.target.value })}
+          >
             <option value="">Generic</option>
             <option value="NatWest">NatWest</option>
             <option value="Barclays">Barclays</option>
-            <option value="HSBC">HSBC</option>
+            <option value="Santander">Santander</option>
           </select>
         </label>
-      </div>
 
-      {/* SDLT toggle sits UNDER the grid, left-aligned */}
-      <label className="mt-3 inline-flex items-center gap-2">
-        <input
-          type="checkbox"
-          className="checkbox"
-          checked={!!values.includeSdlt}
-          onChange={onInclude}
-        />
-        <span className="text-sm text-slate-600 dark:text-slate-300">
-          include SDLT in cash-in
-        </span>
-      </label>
+        <label className="text-sm md:col-span-3 flex items-center gap-2">
+          <input
+            type="checkbox"
+            className="h-4 w-4"
+            checked={!!values.includeSdlt}
+            onChange={(e) => set({ includeSdlt: e.target.checked })}
+          />
+          <span className="text-slate-600">include SDLT in cash-in</span>
+        </label>
+      </div>
     </div>
   );
 }

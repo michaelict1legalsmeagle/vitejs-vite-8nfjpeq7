@@ -1,144 +1,89 @@
 // src/lib/printPdf.ts
-// Dependency-free "export to PDF" via a printable HTML window.
-// The browser's print dialog lets the user save as PDF.
+// Simple print window for the current deal. No external libs.
 
 import type { DealInputs, Metrics } from "./metrics";
 import { fmtCurrency, fmtPct } from "./metrics";
 
-function styleBlock() {
-  return `
-  <style>
-    :root {
-      --bg:#0B1220; --surface:#0F172A; --text:#E2E8F0; --muted:#94A3B8;
-      --green:#16a34a; --amber:#f59e0b; --red:#dc2626; --border:#1f2937;
-    }
-    @media (prefers-color-scheme: light) {
-      :root { --bg:#ffffff; --surface:#ffffff; --text:#0B1220; --muted:#475569; --border:#e5e7eb; }
-    }
-    * { box-sizing: border-box; }
-    html, body { margin:0; padding:0; }
-    body {
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial;
-      background: var(--bg); color: var(--text);
-      -webkit-print-color-adjust: exact; print-color-adjust: exact;
-    }
-    .page { max-width: 960px; margin: 24px auto; padding: 24px; background: var(--surface); border:1px solid var(--border); border-radius: 12px; }
-    h1 { font-size: 22px; margin: 0 0 8px; }
-    h2 { font-size: 14px; margin: 18px 0 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
-    .grid { display: grid; gap: 12px; grid-template-columns: repeat(3, 1fr); }
-    .tile { border:1px solid var(--border); border-radius: 10px; padding: 12px; }
-    .label { font-size: 12px; color: var(--muted); }
-    .value { font-size: 20px; font-weight: 700; margin-top: 2px; }
-    .sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-    .row { display:flex; gap: 8px; align-items:center; }
-    .badge { display:inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #fff; }
-    .GREEN { background: var(--green); }
-    .AMBER { background: var(--amber); color:#000; }
-    .RED { background: var(--red); }
-    .meta { display:grid; grid-template-columns: repeat(2,1fr); gap:8px; font-size: 12px; }
-    .meta div { padding:8px; border:1px dashed var(--border); border-radius: 8px; }
-    .footer { margin-top: 18px; font-size: 11px; color: var(--muted); display:flex; justify-content:space-between; }
-    .small { font-size: 11px; color: var(--muted); }
-    @media print {
-      .no-print { display: none; }
-      body { background: #fff; }
-      .page { border: none; }
-    }
-  </style>
+export function openDealPrintWindow(values: DealInputs, metrics: Metrics) {
+  const w = window.open("", "_blank", "noopener,noreferrer,width=900,height=1200");
+  if (!w) return;
+
+  const style = `
+    <style>
+      :root { color-scheme: light dark; }
+      body { font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; margin: 24px; }
+      h1 { font-size: 20px; margin: 0 0 12px; }
+      h2 { font-size: 16px; margin: 20px 0 8px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+      th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid #ddd; }
+      .grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+      .muted { color: #6b7280; font-size: 12px; }
+      .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace; }
+      @media print {
+        body { margin: 0.5in; }
+        a { text-decoration: none; color: inherit; }
+      }
+    </style>
   `;
-}
 
-function bandClass(n: number, type: "yield" | "icr" | "coc"): "GREEN"|"AMBER"|"RED" {
-  if (type === "yield") return n >= 7 ? "GREEN" : n >= 5 ? "AMBER" : "RED";
-  if (type === "icr") return n >= 1.25 ? "GREEN" : n >= 1.1 ? "AMBER" : "RED";
-  return n >= 10 ? "GREEN" : n >= 6 ? "AMBER" : "RED";
-}
+  const inputs = [
+    ["Scenario", values.scenario ?? ""],
+    ["Postcode", values.postcode ?? ""],
+    ["Lender", values.lender ?? ""],
+    ["Product", values.product || ""],
+    ["Price", values.price ?? ""],
+    ["Monthly rent", values.rent ?? ""],
+    ["Loan", values.loan ?? ""],
+    ["Rate (%)", values.rate ?? ""],
+    ["Term (years)", values.term ?? ""],
+    ["Upfront costs", values.costs ?? ""],
+    ["Include SDLT", values.includeSdlt ? "Yes" : "No"],
+  ];
 
-export function openDealPrintWindow(values: DealInputs, m: Metrics) {
-  const gyBand = bandClass(m.grossYieldPct, "yield");
-  const icrBand = bandClass(m.icr, "icr");
-  const cocBand = bandClass(m.cocPct, "coc");
+  const m = [
+    ["Region", metrics.region],
+    ["Stress rate used", `${metrics.stressUsedPct.toFixed(2)}%`],
+    ["Gross yield", fmtPct(metrics.grossYieldPct)],
+    ["ICR (x)", metrics.icr.toFixed(2)],
+    ["Cash invested", fmtCurrency(metrics.cashInvested)],
+    ["Annual cashflow", fmtCurrency(metrics.annualCashflow)],
+    ["Cash-on-cash", fmtPct(metrics.cocPct)],
+  ];
 
   const html = `
-  <!doctype html>
-  <html>
-    <head>
-      <meta charset="utf-8" />
-      <title>Deal Summary</title>
-      ${styleBlock()}
-    </head>
-    <body>
-      <div class="page">
-        <div class="row" style="justify-content:space-between;">
-          <h1>Deal Summary</h1>
-          <div class="small">${new Date().toLocaleString()}</div>
-        </div>
-        <div class="meta" style="margin-bottom:12px;">
-          <div><b>Scenario:</b> ${values.scenario ?? "—"}</div>
-          <div><b>Region:</b> ${m.region}</div>
-          <div><b>Postcode:</b> ${values.postcode || "—"}</div>
-          <div><b>Lender:</b> ${values.lender || "(Generic)"} &nbsp;•&nbsp; <b>Stress:</b> ${m.stressUsedPct.toFixed(2)}%</div>
-        </div>
-
-        <h2>Metrics</h2>
+    <!doctype html>
+    <html>
+      <head>
+        <meta charset="utf-8" />
+        <title>Deal Snapshot</title>
+        ${style}
+      </head>
+      <body>
+        <h1>Deal Snapshot</h1>
         <div class="grid">
-          <div class="tile">
-            <div class="label">Gross Yield</div>
-            <div class="value">${m.grossYieldPct.toFixed(1)}%</div>
-            <div class="sub"><span class="badge ${gyBand}">${gyBand}</span></div>
+          <div>
+            <h2>Inputs</h2>
+            <table>
+              <tbody>
+                ${inputs.map(([k,v]) => `<tr><th>${k}</th><td class="mono">${v ?? ""}</td></tr>`).join("")}
+              </tbody>
+            </table>
           </div>
-          <div class="tile">
-            <div class="label">ICR (stressed)</div>
-            <div class="value">${m.icr.toFixed(2)}×</div>
-            <div class="sub"><span class="badge ${icrBand}">${icrBand}</span> @ ${m.stressUsedPct.toFixed(2)}%</div>
-          </div>
-          <div class="tile">
-            <div class="label">Cash-on-Cash</div>
-            <div class="value">${m.cocPct.toFixed(1)}%</div>
-            <div class="sub"><span class="badge ${cocBand}">${cocBand}</span> cash-in ${fmtCurrency(m.cashInvested)}</div>
-          </div>
-          <div class="tile">
-            <div class="label">Monthly Debt Service</div>
-            <div class="value">${fmtCurrency(m.monthlyDebtService)}</div>
-            <div class="sub">Annual ${fmtCurrency(m.annualDebtService)}</div>
-          </div>
-          <div class="tile">
-            <div class="label">Annual Cashflow</div>
-            <div class="value">${fmtCurrency(m.annualCashflow)}</div>
-            <div class="sub">${values.product === "REPAY" ? "After repayments" : "After interest"}</div>
-          </div>
-          <div class="tile">
-            <div class="label">Product</div>
-            <div class="value">${values.product || "—"}</div>
-            <div class="sub">${values.rate ?? "—"}% • ${values.term ?? "—"} yrs</div>
+          <div>
+            <h2>Metrics</h2>
+            <table>
+              <tbody>
+                ${m.map(([k,v]) => `<tr><th>${k}</th><td class="mono">${v}</td></tr>`).join("")}
+              </tbody>
+            </table>
+            <p class="muted">Generated ${new Date().toLocaleString()}</p>
           </div>
         </div>
-
-        <h2>Inputs</h2>
-        <div class="grid">
-          <div class="tile"><div class="label">Price</div><div class="value">${fmtCurrency(values.price ?? 0)}</div></div>
-          <div class="tile"><div class="label">Rent (pm)</div><div class="value">${fmtCurrency(values.rent ?? 0)}</div></div>
-          <div class="tile"><div class="label">Loan</div><div class="value">${fmtCurrency(values.loan ?? 0)}</div></div>
-          <div class="tile"><div class="label">Upfront Costs</div><div class="value">${fmtCurrency(values.costs ?? 0)}</div></div>
-          <div class="tile"><div class="label">Include SDLT</div><div class="value">${values.includeSdlt ? "Yes" : "No"}</div><div class="sub">SDLT used: ${fmtCurrency(m.sdltIncluded)}</div></div>
-          <div class="tile"><div class="label">Term</div><div class="value">${values.term ?? "—"} years</div></div>
-        </div>
-
-        <div class="footer">
-          <div>Generated by Investor Metrics</div>
-          <button class="no-print" onclick="window.print()">Print / Save as PDF</button>
-        </div>
-      </div>
-      <script>
-        // Auto-open print after a short tick for layout to render
-        setTimeout(() => { window.print(); }, 250);
-      </script>
-    </body>
-  </html>
+        <script>window.addEventListener('load', () => setTimeout(() => window.print(), 50));</script>
+      </body>
+    </html>
   `;
 
-  const w = window.open("", "_blank");
-  if (!w) return;
   w.document.open();
   w.document.write(html);
   w.document.close();

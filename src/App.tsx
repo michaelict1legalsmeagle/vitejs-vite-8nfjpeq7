@@ -1,4 +1,3 @@
-// src/App.tsx
 import React from "react";
 
 // Sections / widgets
@@ -7,7 +6,7 @@ import InvestorInputs from "./components/InvestorInputs";
 import FinanceCheck from "./components/FinanceCheck";
 import OverallScore from "./components/OverallScore";
 import MetricsPanel from "./components/MetricsPanel";
-import StatusPanel from "./components/StatusPanel"; // ✅ ensure this points to the new one
+import StatusPanel from "./components/StatusPanel";
 import ExplainerPanel from "./components/ExplainerPanel";
 import SaveBar from "./components/SaveBar";
 import Toast from "./components/Toast";
@@ -39,11 +38,13 @@ export default function App() {
           <div className="grid md:grid-cols-3 gap-4">
             <OverallScore />
             <FinanceCheck />
-            <StatusPanel /> {/* ✅ correct StatusPanel */}
+            <StatusPanel />
           </div>
 
           <MetricsPanel />
           <ExplainerPanel />
+
+          {/* ✅ Save bar mounted here */}
           <SaveBar />
         </div>
       </ErrorBoundary>

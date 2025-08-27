@@ -3,7 +3,7 @@ import { regionFromPostcode, type Region } from "./region";
 import { stressFloorFor } from "./thresholds";
 import { computeSdlt } from "./sdlt";
 
-/** Inputs the rest of the app passes around. */
+/** Inputs passed around the app. */
 export type DealInputs = {
   price: number | null;
   rent: number | null;          // monthly
@@ -32,6 +32,7 @@ export type Metrics = {
 
   cashInvested: number;      // upfront cash-in (inc. SDLT if toggled)
   cocPct: number;            // %
+  sdltIncluded: boolean;     // <-- used by SaveBar export
 };
 
 export const GBP = new Intl.NumberFormat("en-GB", {
@@ -110,5 +111,6 @@ export function computeMetricsWithRegion(values: DealInputs): Metrics {
     annualCashflow,
     cashInvested,
     cocPct,
+    sdltIncluded: !!values.includeSdlt,
   };
 }

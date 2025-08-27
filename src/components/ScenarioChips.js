@@ -1,51 +1,26 @@
 import { jsx as _jsx } from "react/jsx-runtime";
 import useDealValues from "../store/useDealValues";
 const PRESETS = [
-    {
-        key: "base",
-        label: "Base",
-        patch: {
-            scenario: "Base",
-        },
-    },
-    {
-        key: "optimistic",
-        label: "Optimistic",
-        patch: {
-            scenario: "Optimistic",
-            rent: (v) => Math.round((v?.rent ?? 0) * 1.05),
-            rate: (v) => Math.max(0, (v?.rate ?? 0) - 0.25),
-            costs: (v) => Math.max(0, Math.round((v?.costs ?? 0) * 0.9)),
-        },
-    },
-    {
-        key: "pessimistic",
-        label: "Pessimistic",
-        patch: {
-            scenario: "Pessimistic",
-            rent: (v) => Math.round((v?.rent ?? 0) * 0.95),
-            rate: (v) => (v?.rate ?? 0) + 0.50,
-            costs: (v) => Math.round((v?.costs ?? 0) * 1.1),
-        },
-    },
+    { key: "conservative", label: "Conservative" },
+    { key: "base", label: "Base" },
+    { key: "repay", label: "Repay" },
+    { key: "stretch", label: "Stretch" },
 ];
-function applySmartPatch(current, patch) {
-    // support function-valued patches for relative tweaks
-    const out = {};
-    for (const [k, v] of Object.entries(patch)) {
-        out[k] = typeof v === "function" ? v(current) : v;
-    }
-    return out;
-}
 export default function ScenarioChips() {
-    const { values, setValues } = useDealValues((s) => s);
-    const onClickPreset = (p) => {
-        const delta = applySmartPatch(values, p.patch);
-        setValues(delta);
+    const values = useDealValues((s) => s.values);
+    const setValues = useDealValues((s) => s.setValues);
+    const current = (values.scenario || "base").toLowerCase();
+    const setScenario = (key) => (e) => {
+        e.preventDefault(); // stop any parent form submit
+        e.stopPropagation();
+        setValues({ scenario: key });
     };
-    return (_jsx("div", { className: "flex flex-wrap gap-2", children: PRESETS.map((p) => {
-            const active = (values.scenario || "").toLowerCase() === p.label.toLowerCase();
-            const cls = active ? "btn btn-primary" : "btn btn-outline";
-            return (_jsx("button", { className: cls, onClick: () => onClickPreset(p), type: "button", children: p.label }, p.key));
+    return (_jsx("div", { className: "flex gap-2", role: "group", "aria-label": "Scenario", children: PRESETS.map((p) => {
+            const isActive = current === p.key;
+            return (_jsx("button", { type: "button" // <- never "submit"
+                , onClick: setScenario(p.key), className: [
+                    "btn btn-sm rounded-lg px-3",
+                    isActive ? "btn-primary" : "btn-outline",
+                ].join(" "), "aria-pressed": isActive, "data-scenario": p.key, children: p.label }, p.key));
         }) }));
 }
