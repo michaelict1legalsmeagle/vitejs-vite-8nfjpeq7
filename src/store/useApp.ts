@@ -2,13 +2,16 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-type Values = Record<string, number | string | null>;
+export type Scenario = "DEFAULT" | "USER" | "LENDER" | "REGION";
+export type Values = Record<string, unknown>;
 
 type AppState = {
-  scenario: "DEFAULT" | "USER" | "LENDER" | "REGION";
+  scenario: Scenario;
   values: Values;
-  setScenario: (s: AppState["scenario"]) => void;
-  setValue: (k: string, v: any) => void;
+
+  setScenario: (s: Scenario) => void;
+  setValue: (key: string, val: unknown) => void;
+  setValues: (patch: Partial<Values>) => void;
 };
 
 export const useApp = create<AppState>()(
@@ -16,19 +19,31 @@ export const useApp = create<AppState>()(
     (set, get) => ({
       scenario: "DEFAULT",
       values: {},
+
+      // return a NEW state object (no in-place mutation)
       setScenario: (s) =>
         set((st) => ({
           ...st,
           scenario: s,
-          // touch a version flag if your metrics subscribe shallowly
-          _v: (Math.random() + performance.now()).toString(),
         })),
-      setValue: (k, v) =>
+
+      // replace values object identity so subscribers fire
+      setValue: (key, val) =>
         set((st) => ({
           ...st,
-          values: { ...st.values, [k]: v }, // REPLACE object identity
+          values: { ...st.values, [key]: val },
+        })),
+
+      // merge patch immutably
+      setValues: (patch) =>
+        set((st) => ({
+          ...st,
+          values: { ...st.values, ...patch },
         })),
     }),
     { name: "app.v1" }
   )
 );
+// Debug only — expose store on window for DevTools
+// @ts-ignore
+if (typeof window !== "undefined") (window as any).useApp = useApp;

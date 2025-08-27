@@ -1,10 +1,9 @@
 // src/components/ScenarioChips.tsx
 import React from "react";
 import { shallow } from "zustand/shallow";
-import { useApp } from "../store/useApp"; // adjust import if your store path differs
+import { useApp } from "../store/useApp";
 
 const SCENARIOS = ["DEFAULT", "USER", "LENDER", "REGION"] as const;
-export type Scenario = (typeof SCENARIOS)[number];
 
 export default function ScenarioChips() {
   const { scenario, setScenario } = useApp(
@@ -20,13 +19,13 @@ export default function ScenarioChips() {
           <button
             key={s}
             type="button"
+            onClick={() => setScenario(s)}
             className={
               "px-3 py-1 rounded-full border text-sm transition " +
               (active
                 ? "bg-black text-white border-black"
                 : "bg-white text-black border-slate-300 hover:bg-slate-100")
             }
-            onClick={() => setScenario(s)}
           >
             {s}
           </button>

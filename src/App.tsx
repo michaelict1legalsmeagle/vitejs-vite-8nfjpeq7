@@ -1,55 +1,78 @@
+// src/App.tsx
 import React from "react";
 
-// Sections / widgets
+// ⬇️ Adjust ONLY if your paths differ
 import ScenarioChips from "./components/ScenarioChips";
-import InvestorInputs from "./components/InvestorInputs";
-import FinanceCheck from "./components/FinanceCheck";
-import OverallScore from "./components/OverallScore";
 import MetricsPanel from "./components/MetricsPanel";
-import StatusPanel from "./components/StatusPanel";
-import ExplainerPanel from "./components/ExplainerPanel";
-import SaveBar from "./components/SaveBar";
-import Toast from "./components/Toast";
-
-// Safety net
-import ErrorBoundary from "./components/ErrorBoundary";
-
-// Styles
-import "./styles/theme.css";
-import "./index.css";
+import Inputs from "./components/Inputs";            // keep your existing Inputs card
+import SaveBar from "./components/SaveBar";          // your existing Save/Export bar
+import { useApp } from "./store/useApp";
+import { useDealValues } from "./store/useDealValues";
+import { regionFromPostcode } from "./lib/region";
 
 export default function App() {
+  // read scenario + deal values for status row (read-only)
+  const scenario = useApp((s) => s.scenario);
+  const values = useDealValues((s) => s.values);
+
+  // very light derived labels for the status bar (no compute-path changes)
+  const postcode = (values as any)?.postcode ?? "";
+  const region = regionFromPostcode(String(postcode || ""));
+  const lender = (values as any)?.lender ?? "Generic";
+  const stress = (values as any)?.stressRate ?? (values as any)?.rate ?? "";
+
   return (
-    <div className="max-w-7xl mx-auto px-4">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Investor Metrics</h1>
-        <div className="text-sm text-slate-400">alpha</div>
+    <div className="min-h-screen bg-white text-slate-900">
+      {/* Header */}
+      <header className="sticky top-0 z-10 border-b bg-white/90 backdrop-blur">
+        <div className="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+          <h1 className="text-lg font-semibold tracking-tight">Deal Scorer — UI</h1>
+          <div className="flex items-center gap-3">
+            <ScenarioChips />
+          </div>
+        </div>
       </header>
 
-      <ErrorBoundary>
-        <div className="grid gap-4">
-          {/* Inputs */}
-          <div className="card">
-            <ScenarioChips />
-            <InvestorInputs />
-          </div>
+      {/* Status bar */}
+      <section className="mx-auto max-w-7xl px-4 py-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm">
+          <StatusPill label="Scenario" value={String(scenario).toLowerCase()} />
+          <StatusPill label="Region" value={region} />
+          <StatusPill label="Lender" value={String(lender)} />
+          <StatusPill label="Stress used" value={String(stress || "—")} />
+        </div>
+      </section>
 
-          {/* Metrics grid */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <OverallScore />
-            <FinanceCheck />
-            <StatusPanel />
-          </div>
+      {/* Main content */}
+      <main className="mx-auto max-w-7xl px-4 pb-10">
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Left: Inputs card (your existing component) */}
+          <section className="rounded-2xl border p-4">
+            <h2 className="mb-3 text-base font-semibold">Inputs</h2>
+            <Inputs />
+          </section>
 
-          <MetricsPanel />
-          <ExplainerPanel />
+          {/* Right: Tiles + explainer (kept exactly as your MetricsPanel renders) */}
+          <section className="rounded-2xl border p-4">
+            <h2 className="mb-3 text-base font-semibold">Finance • Score • Metrics</h2>
+            <MetricsPanel />
+          </section>
+        </div>
 
-          {/* ✅ Save bar mounted here */}
+        {/* Save / Export */}
+        <div className="mt-6">
           <SaveBar />
         </div>
-      </ErrorBoundary>
+      </main>
+    </div>
+  );
+}
 
-      <Toast />
+function StatusPill({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-slate-500">{label}:</span>
+      <span className="px-2 py-0.5 rounded-full border text-xs">{value || "—"}</span>
     </div>
   );
 }
