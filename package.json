@@ -6,13 +6,20 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc -b --pretty false",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest",
+    "smoke": "node ./scripts/smoke.js"
   },
   "dependencies": {
     "@radix-ui/react-tabs": "^1.1.12",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "framer-motion": "^11.0.0",
     "lucide-react": "^0.454.0",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "recharts": "^2.8.0",
@@ -33,6 +40,9 @@
     "tailwindcss": "^3.4.7",
     "typescript": "~5.8.3",
     "typescript-eslint": "^8.39.1",
-    "vite": "^7.1.2"
+    "vite": "^7.1.2",
+    "daisyui": "^4.12.10",
+    "vitest": "^2.0.5",
+    "@vitest/coverage-v8": "^2.0.5"
   }
 }

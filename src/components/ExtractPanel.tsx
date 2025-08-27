@@ -1,11 +1,6 @@
-import React, { useState } from "react";
+// src/components/ExtractPanel.tsx
+import React, { useEffect, useState } from "react";
 import { usePack } from "../store/usePack";
-
-/**
- * Minimal demo: ONE BOX ONLY (Guide Price + URL)
- * - Compact preset selector with clean focus (no big blue bars)
- * - Centered textarea for guide + URL
- */
 
 type Preset = { name: string; guide: string; url: string };
 
@@ -13,7 +8,7 @@ const PRESETS: Preset[] = [
   { name: "Range + fees (Savills)", guide: "Guide Price: £160,000–£180,000 (plus fees).", url: "https://auctions.savills.com/lot/12345" },
   { name: "Single figure (Barnard Marcus)", guide: "Guide Price: £275,000.", url: "https://www.barnardmarcusauctions.co.uk/lot/XYZ9" },
   { name: "In excess of (Allsop)", guide: "Guide Price in excess of £125,000.", url: "https://auctions.allsop.co.uk/lot/ABC22" },
-  { name: "Starting Price (SDL) — no numeric guide", guide: "Starting Price £90,000.", url: "https://www.sdlauctions.co.uk/lot/LOT31" },
+  { name: "Starting Price (SDL)", guide: "Starting Price £90,000.", url: "https://www.sdlauctions.co.uk/lot/LOT31" },
   { name: "POA / TBC (Clive Emson)", guide: "Guide Price: TBC.", url: "https://www.cliveemson.co.uk/lot/5" },
   { name: "Index only (Auction House London)", guide: "Guide Price: £350,000.", url: "https://www.auctionhouselondon.co.uk/auctions/september-catalogue/" },
 ];
@@ -59,6 +54,18 @@ export default function ExtractPanel() {
   const [presetIdx, setPresetIdx] = useState(0);
   const [box, setBox] = useState(buildBoxText(def.guide, def.url));
   const [msg, setMsg] = useState<string | null>(null);
+
+  // new: stack pinned evidence
+  const [pins, setPins] = useState<string[]>([]);
+  useEffect(() => {
+    const onPin = (e: Event) => {
+      const snip = (e as CustomEvent).detail?.snippet as string | undefined;
+      if (!snip) return;
+      setPins((prev) => prev.concat(snip));
+    };
+    window.addEventListener("lexlot:pinEvidence", onPin as EventListener);
+    return () => window.removeEventListener("lexlot:pinEvidence", onPin as EventListener);
+  }, []);
 
   const applyPreset = (i: number) => {
     const p = PRESETS[i];
@@ -114,64 +121,56 @@ export default function ExtractPanel() {
 
   return (
     <div className="space-y-3">
-      <h2 className="font-semibold text-center">Extract Listing (Demo)</h2>
+      <h2 className="font-semibold text-center">Extract Panel</h2>
 
-      {/* Compact tools (centered) */}
+      {/* Compact tools */}
       <div className="flex flex-wrap items-center justify-center gap-2">
         <select
-          className="w-[260px] h-8 text-sm px-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm
-                     focus:outline-none focus:ring-0 focus:border-slate-400"
+          className="w-[260px] h-8 text-sm px-2 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 shadow-sm"
           value={presetIdx}
           onChange={(e) => applyPreset(Number(e.currentTarget.value))}
-          aria-label="Choose example"
         >
           {PRESETS.map((p, i) => (
-            <option key={p.name} value={i}>
-              {p.name}
-            </option>
+            <option key={p.name} value={i}>{p.name}</option>
           ))}
         </select>
-
-        <button type="button" className="btn !py-1.5 !px-3 text-sm" onClick={randomise}>
-          🎲 Random
-        </button>
-
-        <button type="button" className="btn !py-1.5 !px-3 text-sm" onClick={reset}>
-          ↩︎ Reset
-        </button>
+        <button type="button" className="btn btn-sm" onClick={randomise}>🎲 Random</button>
+        <button type="button" className="btn btn-sm" onClick={reset}>↩︎ Reset</button>
       </div>
 
-      {/* ONE BOX ONLY (centered) */}
-      <div className="flex justify-center">
-        <textarea
-          className="w-full max-w-[560px] rounded-md border border-slate-300 dark:border-slate-700 p-3 bg-white dark:bg-slate-900
-                     text-center leading-relaxed text-[15px] shadow-sm focus:outline-none focus:ring-0 focus:border-slate-400"
-          rows={5}
-          value={box}
-          onChange={(e) => setBox(e.currentTarget.value)}
-          placeholder={"Guide Price: £160,000–£180,000 (plus fees).\nView lot: https://auctions.example.com/lot/123"}
-          spellCheck={false}
-        />
-      </div>
+      {/* One box */}
+      <textarea
+        className="w-full rounded-md border border-slate-300 dark:border-slate-700 p-3 bg-white dark:bg-slate-900
+                   text-center leading-relaxed text-[15px] shadow-sm"
+        rows={4}
+        value={box}
+        onChange={(e) => setBox(e.currentTarget.value)}
+        placeholder={"Guide Price: £160,000–£180,000 (plus fees).\nView lot: https://auctions.example.com/lot/123"}
+      />
 
-      {/* Actions (centered, compact) */}
+      {/* Actions */}
       <div className="flex items-center justify-center gap-2">
-        <button type="button" className="btn !py-1.5 !px-3 text-sm" onClick={copy}>
-          📋 Copy
-        </button>
-        <button type="button" className="btn !py-1.5 !px-3 text-sm" onClick={() => run(false)}>
-          🧪 Run Extraction
-        </button>
-        <button type="button" className="btn !py-1.5 !px-3 text-sm" onClick={() => run(true)}>
-          👀 Run & View
-        </button>
+        <button type="button" className="btn btn-sm" onClick={copy}>📋 Copy</button>
+        <button type="button" className="btn btn-sm" onClick={() => run(false)}>🧪 Run</button>
+        <button type="button" className="btn btn-sm" onClick={() => run(true)}>👀 Run & View</button>
       </div>
 
       {msg && <div className="text-xs text-center">{msg}</div>}
-
       {existing && (
         <div className="text-xs opacity-70 text-center">
           Last extracted: {existing.listing.auction_house_name || "—"}
+        </div>
+      )}
+
+      {/* Evidence pins */}
+      {pins.length > 0 && (
+        <div className="mt-4 border-t pt-2">
+          <div className="font-semibold text-sm mb-2">Pinned Evidence</div>
+          <ul className="space-y-1 max-h-40 overflow-auto text-xs">
+            {pins.map((p, i) => (
+              <li key={i} className="p-1 bg-slate-100 dark:bg-slate-800 rounded">{p}</li>
+            ))}
+          </ul>
         </div>
       )}
     </div>

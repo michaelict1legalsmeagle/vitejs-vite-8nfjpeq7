@@ -1,0 +1,14 @@
+[
+  {
+    "regionId": "LONDON",
+    "tenancy": "single",
+    "gross": { "g": 0.055, "a": 0.045 },
+    "net":   { "g": 0.038, "a": 0.028 }
+  },
+  {
+    "regionId": "NORTH_WEST",
+    "tenancy": "single",
+    "gross": { "g": 0.07,  "a": 0.05 },
+    "net":   { "g": 0.055, "a": 0.04 }
+  }
+]

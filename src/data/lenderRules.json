@@ -1,0 +1,10 @@
+[
+  {
+    "lenderId": "GENERIC",
+    "name": "Generic BTL",
+    "products": [
+      { "code": "BTL_IO",     "label": "BTL — Interest‑Only", "maxLtv": 0.75, "icrBasic": 1.25, "icrHigher": 1.45, "stressRate": 0.055 },
+      { "code": "BTL_Repay",  "label": "BTL — Repayment",     "maxLtv": 0.75, "icrBasic": 1.25, "icrHigher": 1.45, "stressRate": 0.055 }
+    ]
+  }
+]

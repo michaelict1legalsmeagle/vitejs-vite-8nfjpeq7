@@ -1,13 +1,11 @@
 {
-  "name": "lexlot-proxy",
-  "version": "0.1.0",
-  "type": "module",
+  "name": "api-node",
   "private": true,
-  "scripts": {
-    "start": "node server.js"
-  },
+  "type": "module",
   "dependencies": {
     "cors": "^2.8.5",
-    "express": "^4.19.2"
+    "express": "^5.1.0",
+    "multer": "^2.0.2",
+    "pdf-parse": "^1.1.1"
   }
 }

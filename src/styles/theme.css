@@ -1,0 +1,60 @@
+/* CSS variables for light/dark themes used by index.css components layer */
+
+:root {
+  /* Surfaces */
+  --bg:        #0b1220;  /* fallback for systems that default dark; overridden below */
+  --surface:   #ffffff;
+  --border:    #e5e7eb;
+  --text:      #0b1220;
+  --muted:     #64748b;
+
+  /* Brand */
+  --primary:   #2563eb;   /* blue-600 */
+  --accent:    #2dd4bf;   /* teal-400 */
+  --accent-weak: rgba(45, 212, 191, 0.25);
+
+  /* Feedback */
+  --error:     #dc2626;   /* red-600 */
+  --warning:   #f59e0b;   /* amber-500 */
+  --success:   #16a34a;   /* green-600 */
+
+  /* Shadows */
+  --shadow: 0 1px 2px rgba(2,6,23,0.05), 0 8px 24px rgba(2,6,23,0.06);
+}
+
+/* Light theme (default) */
+:root {
+  --bg:        #f8fafc;   /* slate-50 */
+  --surface:   #ffffff;
+  --border:    #e2e8f0;   /* slate-200 */
+  --text:      #0b1220;   /* slate-950 */
+  --muted:     #64748b;   /* slate-500 */
+}
+
+/* Dark theme (activates with .dark on <html> or <body>) */
+.dark {
+  --bg:        #0b1220;   /* slate-950 */
+  --surface:   #0f172a;   /* slate-900 */
+  --border:    #1f2937;   /* slate-800 */
+  --text:      #e5e7eb;   /* slate-200 */
+  --muted:     #94a3b8;   /* slate-400 */
+
+  --primary:   #3b82f6;   /* blue-500 (a bit brighter on dark) */
+  --accent:    #22d3ee;   /* cyan-400 */
+  --accent-weak: rgba(34, 211, 238, 0.25);
+
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 12px 28px rgba(0,0,0,0.35);
+}
+
+/* High-contrast focus for keyboard users */
+:root:focus-within {
+  --primary: color-mix(in oklab, var(--primary), white 2%);
+}
+
+@media (prefers-color-scheme: dark) {
+  /* Auto-dark if you’re not using .dark class toggling */
+  :root:not(.force-light):not(.force-dark) {
+    /* noop: the .dark class approach is preferred; this block is here
+       only if you remove .dark toggling and rely on system theme */
+  }
+}

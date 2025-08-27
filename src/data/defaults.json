@@ -1,0 +1,10 @@
+{
+  "gross":     { "g": 0.07,  "a": 0.05,  "invert": false },
+  "net":       { "g": 0.045, "a": 0.03,  "invert": false },
+  "coc":       { "g": 0.10,  "a": 0.07,  "invert": false },
+  "icr":       { "g": 1.45,  "a": 1.25,  "invert": false },
+  "roi5":      { "g": 0.50,  "a": 0.30,  "invert": false },
+  "breakeven": { "g": 0.80,  "a": 0.90,  "invert": true  },
+  "ltv":       { "g": 0.75,  "a": 0.80,  "invert": true  },
+  "sdlt":      { "g": 0.03,  "a": 0.05,  "invert": true  }
+}
